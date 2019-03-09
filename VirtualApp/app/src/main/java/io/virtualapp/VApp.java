@@ -54,7 +54,8 @@ public class VApp extends MultiDexApplication {
                         .withListener(() -> {
                             // nothing
                         })
-                        .build(VApp.this, "48RJJP7ZCZZBB6KMMWW5");
+                        .build(VApp.this, "48RJJP7ZCZZBB6KMMWW5_");
+                // 这里我注释掉了数据采集
             }
 
             @Override
