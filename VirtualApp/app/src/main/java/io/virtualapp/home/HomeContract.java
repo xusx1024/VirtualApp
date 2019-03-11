@@ -1,54 +1,51 @@
 package io.virtualapp.home;
 
-
-import java.util.List;
-
 import io.virtualapp.abs.BasePresenter;
 import io.virtualapp.abs.BaseView;
 import io.virtualapp.home.models.AppData;
 import io.virtualapp.home.models.AppInfoLite;
+import java.util.List;
 
 /**
  * @author Lody
  */
 /* package */ class HomeContract {
 
-	/* package */ interface HomeView extends BaseView<HomePresenter> {
+  /* package */ interface HomeView extends BaseView<HomePresenter> {
 
-        void showBottomAction();
+    void showBottomAction();
 
-        void hideBottomAction();
+    void hideBottomAction();
 
-		void showLoading();
+    void showLoading();
 
-		void hideLoading();
+    void hideLoading();
 
-		void loadFinish(List<AppData> appModels);
+    void loadFinish(List<AppData> appModels);
 
-		void loadError(Throwable err);
+    void loadError(Throwable err);
 
-		void showGuide();
+    void showGuide();
 
-		void addAppToLauncher(AppData model);
+    void addAppToLauncher(AppData model);
 
-        void removeAppToLauncher(AppData model);
+    void removeAppToLauncher(AppData model);
 
-		void refreshLauncherItem(AppData model);
+    void refreshLauncherItem(AppData model);
 
-		void askInstallGms();
-	}
+    void askInstallGms();
+  }
 
-	/* package */ interface HomePresenter extends BasePresenter {
+  /* package */ interface HomePresenter extends BasePresenter {
 
-		void launchApp(AppData data);
+    void launchApp(AppData data);
 
-		void dataChanged();
+    void dataChanged();
 
-		void addApp(AppInfoLite info);
+    void addApp(AppInfoLite info);
 
-		void deleteApp(AppData data);
+    void deleteApp(AppData data);
 
-        void createShortcut(AppData data);
-    }
-
+    void createShortcut(AppData data);
+  }
 }

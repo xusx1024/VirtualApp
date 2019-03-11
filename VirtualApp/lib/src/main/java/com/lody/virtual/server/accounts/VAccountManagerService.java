@@ -548,7 +548,7 @@ public class VAccountManagerService implements IAccountManager {
         }.bind();
     }
 
-    public void confirmCredentials(int userId, IAccountManagerResponse response, final Account account, final Bundle options, final boolean expectActivityLaunch) {
+    @Override public void confirmCredentials(int userId, IAccountManagerResponse response, final Account account, final Bundle options, final boolean expectActivityLaunch) {
         if (response == null) throw new IllegalArgumentException("response is null");
         if (account == null) throw new IllegalArgumentException("account is null");
         AuthenticatorInfo info = getAuthenticatorInfo(account.type);

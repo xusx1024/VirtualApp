@@ -8,6 +8,7 @@ import com.lody.virtual.remote.InstalledAppInfo;
 import java.util.List;
 
 /**
+ * {@see VAppMan }
  * @author Lody
  */
 public interface IAppManager {

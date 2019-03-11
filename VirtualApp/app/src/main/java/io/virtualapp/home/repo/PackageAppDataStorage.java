@@ -14,7 +14,7 @@ import io.virtualapp.home.models.PackageAppData;
 /**
  * @author Lody
  *         <p>
- *         Cache the loaded PackageAppData.
+ *         Cache the loaded PackageAppData.缓存加载过的应用数据
  */
 public class PackageAppDataStorage {
 
