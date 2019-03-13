@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import com.hairui.autologin.helper.BaseAccessibilityService;
 import com.hairui.autologin.kit.JavaKit;
 import com.hairui.autologin.kit.VUiKit;
 import com.hairui.autologin.models.AppData;
@@ -42,8 +43,11 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
   private static final String TAG = MainActivity.class.getSimpleName();
+  private static final String QQ_PKG_NAME = "com.tencent.mobileqq";
+  private static final String WZRY_PKG_NAME = "com.tencent.tmgp.sgame";
   List<AppInfo> allLocalApps;
   List<AppData> localVirtualApps;
+  BaseAccessibilityService service = BaseAccessibilityService.getInstance();
   private EditText mToken;
   private Button mLogin;
   private TextView mInfo;
@@ -68,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     setSupportActionBar(toolbar);
     initView();
     fakeRequest();
+    service.init(this);
     mLogin.setOnClickListener(v -> {
       if (hadFakeRequest) {
         clearNoteInfo();
@@ -83,58 +88,35 @@ public class MainActivity extends AppCompatActivity {
     mRepo = new AppRepository(this);
     mRepository = new AppRepository(this);
     showProgress();
-    refreshNoteInfo("查找已多开应用列表。。。");
-    mRepo.getVirtualApps().done(result -> {
-      localVirtualApps = result;
-      for (AppData data : localVirtualApps) {
-        PackageAppData appData = (PackageAppData) data;
-        if ("com.tencent.tmgp.sgame".equals(appData.packageName)) {
-          refreshNoteInfo("找到应用：\n" + appData.toString());
-          Log.e(TAG, appData.toString());
-          refreshNoteInfo("开始多开。。。");
-          handleOptApp(appData, appData.packageName, true);
-          hasLocalApp = true;
-          break;
-        }
-      }
-      if (!hasLocalApp) {
-        multiOpen();
-      }
-    });
-  }
+    refreshNoteInfo("查找本地已多开应用列表。。。");
+    PackageAppData appData = PackageAppDataStorage.get().acquire(WZRY_PKG_NAME);
+    if (appData == null) {
+      multiOpen();
+    } else {
+      refreshNoteInfo("找到应用：\n" + appData.toString());
+      Log.e(TAG, appData.toString());
 
-  /**
-   * 伪请求
-   */
-  private void fakeRequest() {
-    showProgress();
-    new Handler().postDelayed(() -> {
-      hideProgress();
-      refreshNoteInfo("上号码有效！");
-      refreshNoteInfo("套餐：3h");
-      long start = System.currentTimeMillis();
-      long end = start + 60 * 60 * 1000 * 3;
-      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      refreshNoteInfo("开始时间：" + simpleDateFormat.format(start));
-      refreshNoteInfo("结束时间：" + simpleDateFormat.format(end));
-      refreshNoteInfo("操作系统：Android");
-      refreshNoteInfo("游戏名称：王者荣耀");
-      refreshNoteInfo("》》》》》》》》》信息有效，请点击上号");
-      refreshNoteInfo("\n\n");
-      hadFakeRequest = true;
-    }, 3000);
+      refreshNoteInfo("启动游戏前准备。。。");
+      handleOptApp(appData, appData.packageName, true);
+      //boolean hasPermission =
+      //    AccessibilityUtil.isSettingOpen(QqLoginAccessibilityService.class, MainActivity.this);
+      //if (hasPermission) {
+      //  hasLocalApp = true;
+      //} else {
+      //  AccessibilityUtil.checkSetting(MainActivity.this, QqLoginAccessibilityService.class);
+      //}
+    }
   }
 
   /**
    * 尝试多开
    */
   private void multiOpen() {
-
     refreshNoteInfo("查找应用列表。。。");
     mRepository.getInstalledApps(this).done(result -> {
       allLocalApps = result;
       for (AppInfo ai : allLocalApps) {
-        if ("com.tencent.tmgp.sgame".equals(ai.packageName)) {
+        if (WZRY_PKG_NAME.equals(ai.packageName)) {
           refreshNoteInfo("找到应用：\n" + ai.toString());
           Log.e(TAG, ai.toString());
           refreshNoteInfo("添加进多开列表。。。");
@@ -145,37 +127,8 @@ public class MainActivity extends AppCompatActivity {
     });
   }
 
-  private void refreshNoteInfo(String newInfo) {
-    mInfoContent.append(newInfo);
-    mInfoContent.append("\n");
-    mInfo.setText(mInfoContent.toString());
-  }
-
-  private void clearNoteInfo() {
-    mInfoContent = new StringBuilder();
-    refreshNoteInfo("");
-  }
-
-  public void hideProgress() {
-    mProgressBar.setVisibility(View.GONE);
-  }
-
-  public void showProgress() {
-    mProgressBar.setVisibility(View.VISIBLE);
-  }
-
-  private void initView() {
-    mToken = findViewById(R.id.textInputEditText);
-    mLogin = findViewById(R.id.login);
-    mInfo = findViewById(R.id.otherInfo);
-    mInfo.setMovementMethod(ScrollingMovementMethod.getInstance());
-    mProgressBar = findViewById(R.id.loading);
-    mProgressBar.setVisibility(View.GONE);
-    mToken.setText(JavaKit.fakeToken(18));
-  }
-
   /**
-   * 多开游戏
+   * 多开游戏加入本地
    */
   private void addApp(AppInfoLite info) {
     class AddResult {
@@ -234,11 +187,13 @@ public class MainActivity extends AppCompatActivity {
       }
     }).then((res) -> {
       addResult.appData = PackageAppDataStorage.get().acquire(info.packageName);
+      refreshNoteInfo("从本地多开列表查询：" + addResult.appData.getName());
     }).done(res -> {
       /**
        * 多分身
        */
       boolean multipleVersion = addResult.justEnableHidden && addResult.userId != 0;
+      refreshNoteInfo("是否是本地多个多开：" + multipleVersion);
       if (!multipleVersion) {
         PackageAppData data = addResult.appData;
         data.isLoading = true;
@@ -248,6 +203,42 @@ public class MainActivity extends AppCompatActivity {
             new MultiplePackageAppData(addResult.appData, addResult.userId);
         data.isLoading = true;
         handleOptApp(data, info.packageName, false);
+      }
+    });
+  }
+
+  /**
+   * dex 优化
+   */
+  private void handleOptApp(AppData data, String packageName, boolean needOpt) {
+    VUiKit.defer().when(() -> {
+      long time = System.currentTimeMillis();
+      if (needOpt) {
+        try {
+          VirtualCore.get().preOpt(packageName);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      time = System.currentTimeMillis() - time;
+      refreshNoteInfo("应用启用了odex？" + needOpt);
+      refreshNoteInfo("准备odex时间:" + time + "ms");
+      if (time < 3000L) {
+        try {
+          Thread.sleep(3000L - time);
+        } catch (InterruptedException e) {
+          refreshNoteInfo("准备odex异常:" + e.getLocalizedMessage());
+          e.printStackTrace();
+        }
+      }
+    }).done((res) -> {
+      if (data instanceof PackageAppData) {
+        ((PackageAppData) data).isLoading = false;
+        ((PackageAppData) data).isFirstOpen = true;
+        launchApp(data);
+      } else if (data instanceof MultiplePackageAppData) {
+        ((MultiplePackageAppData) data).isLoading = false;
+        ((MultiplePackageAppData) data).isFirstOpen = true;
       }
     });
   }
@@ -289,41 +280,60 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
-  private void handleOptApp(AppData data, String packageName, boolean needOpt) {
-    VUiKit.defer().when(() -> {
-      long time = System.currentTimeMillis();
-      if (needOpt) {
-        try {
-          VirtualCore.get().preOpt(packageName);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-      time = System.currentTimeMillis() - time;
-      refreshNoteInfo("应用启用了odex？" + needOpt);
-      refreshNoteInfo("准备odex时间:" + time + "ms");
-      if (time < 3000L) {
-        try {
-          Thread.sleep(3000L - time);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
-    }).done((res) -> {
-      if (data instanceof PackageAppData) {
-        ((PackageAppData) data).isLoading = false;
-        ((PackageAppData) data).isFirstOpen = true;
-        launchApp(data);
-      } else if (data instanceof MultiplePackageAppData) {
-        ((MultiplePackageAppData) data).isLoading = false;
-        ((MultiplePackageAppData) data).isFirstOpen = true;
-      }
-    });
+  private void refreshNoteInfo(String newInfo) {
+    mInfoContent.append(newInfo);
+    mInfoContent.append("\n");
+    mInfo.setText(mInfoContent.toString());
+  }
+
+  private void clearNoteInfo() {
+    mInfoContent = new StringBuilder();
+    refreshNoteInfo("");
+  }
+
+  public void hideProgress() {
+    mProgressBar.setVisibility(View.GONE);
+  }
+
+  public void showProgress() {
+    mProgressBar.setVisibility(View.VISIBLE);
+  }
+
+  private void initView() {
+    mToken = findViewById(R.id.textInputEditText);
+    mLogin = findViewById(R.id.login);
+    mInfo = findViewById(R.id.otherInfo);
+    mInfo.setMovementMethod(ScrollingMovementMethod.getInstance());
+    mProgressBar = findViewById(R.id.loading);
+    mProgressBar.setVisibility(View.GONE);
+    mToken.setText(JavaKit.fakeToken(18));
   }
 
   @Override protected void onDestroy() {
     super.onDestroy();
     hideProgress();
     clearNoteInfo();
+  }
+
+  /**
+   * 伪请求
+   */
+  private void fakeRequest() {
+    showProgress();
+    new Handler().postDelayed(() -> {
+      hideProgress();
+      refreshNoteInfo("上号码有效！");
+      refreshNoteInfo("套餐：3h");
+      long start = System.currentTimeMillis();
+      long end = start + 60 * 60 * 1000 * 3;
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      refreshNoteInfo("开始时间：" + simpleDateFormat.format(start));
+      refreshNoteInfo("结束时间：" + simpleDateFormat.format(end));
+      refreshNoteInfo("操作系统：Android");
+      refreshNoteInfo("游戏名称：王者荣耀");
+      refreshNoteInfo("》》》》》》》》》信息有效，请点击上号");
+      refreshNoteInfo("\n\n");
+      hadFakeRequest = true;
+    }, 3000);
   }
 }

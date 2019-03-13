@@ -1,4 +1,5 @@
 <resources>
   <string name="app_name">上号器</string>
   <string name="title_activity_main">MainActivity</string>
+  <string name="des">请确保上号期间打开，如发现不能自动输入密码，请先关掉辅助功能再重新打开</string>
 </resources>
