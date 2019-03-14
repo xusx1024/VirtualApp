@@ -79,6 +79,9 @@ public final class InvocationStubManager {
     return sInstance;
   }
 
+  /**
+   * 注入系统类并实现替换
+   */
   void injectAll() throws Throwable {
     for (IInjector injector : mInjectors.values()) {
       injector.inject();
@@ -102,15 +105,23 @@ public final class InvocationStubManager {
     sInit = true;
   }
 
+  /**
+   * frameWork 组件注入
+   */
   private void injectInternal() throws Throwable {
+    // 当前主线程
     if (VirtualCore.get().isMainProcess()) {
       return;
     }
+
+    // 服务进程
     if (VirtualCore.get().isServerProcess()) {
       addInjector(new ActivityManagerStub());
       addInjector(new PackageManagerStub());
       return;
     }
+
+    // 虚拟app进程
     if (VirtualCore.get().isVAppProcess()) {
       addInjector(new LibCoreStub());
       addInjector(new ActivityManagerStub());
