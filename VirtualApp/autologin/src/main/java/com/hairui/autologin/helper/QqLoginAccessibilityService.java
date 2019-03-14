@@ -45,7 +45,6 @@ public class QqLoginAccessibilityService extends BaseAccessibilityService {
   private boolean goThrough(AccessibilityNodeInfo info) {
 
     if (info.getChildCount() == 0) {
-
       if (info.toString().contains("请输入QQ号码或手机或邮箱")
           && info.toString().contains("QQ号/手机号/邮箱")
           && "android.widget.EditText".equals(info.getClassName())) {
