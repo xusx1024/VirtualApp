@@ -27,8 +27,8 @@ public class AccessibilityUtil {
     if (isSettingOpen(service, cxt)) {
       return;
     }
-    new AlertDialog.Builder(cxt).setTitle("\"辅助功能(无障碍)\"设置")
-        .setMessage("找到并勾选\"上号器\"")
+    new AlertDialog.Builder(cxt).setTitle("服务提醒")
+        .setMessage("您需要找到并勾选\"上号器\"的无障碍服务，才能使用完整功能")
         .setPositiveButton("好的", (dialog, which) -> jumpToSetting(cxt))
         .show();
   }

@@ -1,9 +1,13 @@
 package com.hairui.autologin;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
@@ -13,7 +17,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import com.hairui.autologin.helper.AccessibilityUtil;
 import com.hairui.autologin.helper.BaseAccessibilityService;
+import com.hairui.autologin.helper.QqLoginAccessibilityService;
 import com.hairui.autologin.kit.JavaKit;
 import com.hairui.autologin.kit.VUiKit;
 import com.hairui.autologin.models.AppData;
@@ -81,6 +87,29 @@ public class MainActivity extends AppCompatActivity {
     });
   }
 
+  @Override protected void onResume() {
+    super.onResume();
+    checkSDCard();
+    checkAccessibilityPermission();
+  }
+
+  private void checkAccessibilityPermission() {
+    boolean hasPermission =
+        AccessibilityUtil.isSettingOpen(QqLoginAccessibilityService.class, MainActivity.this);
+    if (!hasPermission) {
+      AccessibilityUtil.checkSetting(MainActivity.this, QqLoginAccessibilityService.class);
+    }
+  }
+
+  private void checkSDCard() {
+    int permissionCheck =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+      ActivityCompat.requestPermissions(this,
+          new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, 100);
+    }
+  }
+
   /**
    * 本地查找
    */
@@ -98,13 +127,6 @@ public class MainActivity extends AppCompatActivity {
 
       refreshNoteInfo("启动游戏前准备。。。");
       handleOptApp(appData, appData.packageName, true);
-      //boolean hasPermission =
-      //    AccessibilityUtil.isSettingOpen(QqLoginAccessibilityService.class, MainActivity.this);
-      //if (hasPermission) {
-      //  hasLocalApp = true;
-      //} else {
-      //  AccessibilityUtil.checkSetting(MainActivity.this, QqLoginAccessibilityService.class);
-      //}
     }
   }
 
