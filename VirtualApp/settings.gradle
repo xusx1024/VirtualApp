@@ -1,1 +1,1 @@
-include ':lib', ':app', ':autologin'
+include ':lib', ':app', ':autologin', ':dynamic_proxy'
