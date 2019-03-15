@@ -1,0 +1,142 @@
+@startuml
+'
+'abstract class AbstractList
+'abstract AbstractCollection
+'interface List
+'interface Collection
+'
+'List <|-- AbstractList
+'Collection <|-- AbstractCollection
+'
+'Collection <|- List
+'AbstractCollection <|- AbstractList
+'AbstractList <|-- ArrayList
+'
+'class ArrayList {
+'Object[] elementData
+'size()
+'}
+'
+'enum TimeUnit {
+'DAYS
+'HOURS
+'MINUTES
+'}
+package android.app  #DDDDDD{
+class ActivityThread{
+int i
+.. 构造，获取资源管理器单例 ..
+# ActivityThread()
+.. Java程序入口 ..
++ static void main(String args)
+.. 启动Activity的核心实现 ..
+- Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent)
+.. 内容提供者相关 ..
++ IContentProvider acquireExistingProvider(Context c, String auth, int userId, boolean stable)
+
+}
+class ActivityClientRecord{
+.. 构造 ..
++ ActivityClientRecord()
++ ActivityClientRecord()
+}
+
+class DropBoxReporter{
+}
+
+class EventLoggingReporter{
+}
+
+class RemoteServiceException{
++ RemoteServiceException(String msg)
+}
+
+class AppBindData{
+}
+
+class ApplicationThread{
+}
+
+class BindServiceData{
+}
+
+class ContextCleanupInfo{
+}
+
+class CreateBackupAgentData{
+}
+
+class CreateServiceData{
+}
+
+class DumpComponentInfo{
+}
+
+class DumpHeapData{
+}
+
+class GcIdler{
+}
+
+class H{
+}
+
+class Idler{
+}
+
+class Profiler{
+}
+
+class ProviderClientRecord{
+}
+
+class ProviderKey{
+}
+
+class ProviderRefCount{
+}
+
+class ReceiverData{
+}
+
+class RequestAssistContextExtras{
+}
+
+class ServiceArgsData{
+}
+
+class UpdateCompatibilityData{
+}
+
+' ------ 类的关系 ------
+ActivityThread +-- ActivityClientRecord
+ActivityThread +-- AppBindData
+ActivityThread +-- ApplicationThread
+ActivityThread +-- BindServiceData
+ActivityThread +-- ContextCleanupInfo
+ActivityThread +-- CreateBackupAgentData
+ActivityThread +-- CreateServiceData
+ActivityThread +-- DumpComponentInfo
+ActivityThread +-- DumpHeapData
+ActivityThread +-- DropBoxReporter
+ActivityThread +-- EventLoggingReporter
+ActivityThread +-- GcIdler
+ActivityThread +-- H
+ActivityThread +-- Idler
+ActivityThread +-- Profiler
+ActivityThread +-- ProviderClientRecord
+ActivityThread +-- ProviderKey
+ActivityThread +-- ProviderRefCount
+ActivityThread +-- ReceiverData
+ActivityThread +-- RequestAssistContextExtras
+ActivityThread +-- ServiceArgsData
+ActivityThread +-- UpdateCompatibilityData
+
+
+
+' ------ 类的注解 ------
+note top of ActivityThread: 管理应用进程中主线程的执行
+note top of ActivityClientRecord: Activity的记录，用于记\n录真实的Activity的实例
+}
+
+@enduml
